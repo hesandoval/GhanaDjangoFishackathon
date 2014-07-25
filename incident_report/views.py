@@ -11,6 +11,7 @@ from base64 import b64decode
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json #for json encoding, decoding
+from django.utils import timezone
 # Create your views here.
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 def index(request):
@@ -34,9 +35,13 @@ def incident(request):
         form = Incident_Report_Form(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
+            i = Incident(description=cd['description'], incident_image=cd['incident_image'], x_gps_coordinate=['x_gps_coordinate'],
+                         y_gps_coordinate=cd['y_gps_coordinate'], pub_date=timezone.now())
+            i.save();
     else:
+        print "Generating form:"
         form = Incident_Report_Form()
-    return render(request, 'incident.html', {'form':'form'})
+    return render(request, 'incident.html', {'form':form})
 
 
 @csrf_exempt
