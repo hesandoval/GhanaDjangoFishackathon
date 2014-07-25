@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from PIL import Image
 from io import BytesIO
 from models import Incident
+from forms import Incident_Report_Form
 from base64 import b64decode
 from django.views.decorators.csrf import csrf_exempt
 import os
@@ -27,6 +28,16 @@ def show_map(request):
 
 #def add_user(request):
 #    user = User.objects.create()
+
+def incident(request):
+    if request.method == 'POST':
+        form = Incident_Report_Form(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+    else:
+        form = Incident_Report_Form()
+    return render(request, 'incident.html', {'form':'form'})
+
 
 @csrf_exempt
 def lol(request):
