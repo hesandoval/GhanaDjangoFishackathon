@@ -24,24 +24,29 @@ def receive_incident(request):
 
 def show_map(request):
     incident_list = Incident.objects.get_queryset()
-    context = {'incident_list':incident_list}
-    return render(request, 'incident_report/map.html')
+    api_key = "AIzaSyBiH87EbyZfS3ekdWJ_BBQ-vlrE8jhU-jk"
+    context = {'incident_list':incident_list, "API_KEY":api_key}
+    return render(request, 'incident_report/map.html', context)
 
 #def add_user(request):
 #    user = User.objects.create()
 
 def incident(request):
     if request.method == 'POST':
-        form = Incident_Report_Form(request.POST)
+        form = Incident_Report_Form(request.POST, request.FILES)
         if form.is_valid():
+            print "form was valid"
+
             cd = form.cleaned_data
-            i = Incident(description=cd['description'], incident_image=cd['incident_image'], x_gps_coordinate=['x_gps_coordinate'],
+            print "cd: ", cd
+            i = Incident(description=cd['description'], incident_image=cd['incident_image'], x_gps_coordinate=cd['x_gps_coordinate'],
                          y_gps_coordinate=cd['y_gps_coordinate'], pub_date=timezone.now())
-            i.save();
+            i.save()
+            return HttpResponse("Thank You!")
     else:
         print "Generating form:"
         form = Incident_Report_Form()
-    return render(request, 'incident.html', {'form':form})
+    return render(request, 'incident_report/incident.html', {'form':form})
 
 
 @csrf_exempt
@@ -66,10 +71,10 @@ def lol(request):
     image = Image.frombytes('RGB',bytes, (400,600))
 
     print "Image: ", type(image)
-    print BASE_DIR+"/media/documents"
+    print BASE_DIR+"/media/documents1"
     #image.save()
     # photo = base64.decodestring(image)
-    image.save(BASE_DIR+"/media/documents",".png")
+    image.save(BASE_DIR+"/media/documents1",".png")
     i = Incident(description=description, incident_image=image, x_gps_coordinate=latitude, y_gps_coordinate=longitude,
                     pub_date=today)
     i.save()

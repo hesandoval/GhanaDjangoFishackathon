@@ -1,5 +1,7 @@
 from incident_report import views
 from django.conf.urls import patterns, include, url
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = patterns('',
 
@@ -9,3 +11,9 @@ urlpatterns = patterns('',
     url(r'^/incident/$', views.incident, name='incident'),
 
 )
+if settings.DEBUG:
+    urlpatterns += patterns(
+        'django.views.static',
+        (r'media/(?P<path>.*)',
+        'serve',
+        {'document_root': settings.MEDIA_ROOT}), )

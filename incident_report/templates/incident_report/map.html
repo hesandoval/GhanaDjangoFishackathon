@@ -1,38 +1,111 @@
 <!DOCTYPE html>
-<!-- Note: {} are django template tags. They allow for indirect reference to database -->
 <html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map-canvas { height: 50% }
+      table, th, td{
+        border: 1px solid black;
+        border-collapse:collapse;
+      }
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key={{API_KEY}}">
+    </script>
+  </head>
+  <body>
+  <div>
+    <table style="width: 300px;"id="incident-table">
+        <tr>
+            <th>Date Added</th>
+            <th>Longitude</th>
+            <th>Latitude</th>
+        </tr>
+        {% for incident in incident_list %}
+        <tr id="row_{{forloop.counter}}" onmouseover="animateMarker({{forloop.counter0}})"
+            onmouseout="stopMarker({{forloop.counter0}})" onclick="displayInfo({{forloop.counter0}})">
+            <td class="date">{{incident.pub_date}}</td>
+            <td class="lat">{{incident.x_gps_coordinate}}</td>
+            <td class="lng">{{incident.y_gps_coordinate}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
 
-	<head>
-		<title>Poll Map</title>
-		<meta charset = "utf-8" />
-		<link rel="stylesheet" href="/static/polls/poll.css" type="text/css"/>
-		<link rel="shortcut icon" href="/static/polls/59-128-20140514-favicon.ico">
-		<script src="http://maps.google.com/maps/api/js?sensor=false"
-		type="text/javascript"></script>
+    <div id="map-canvas" style="width:100%;height:100%;"/>
+  </body>
+  <script>
+      var allMarkers = [];
+      var allInfoWindows = [];
+      function initialize() {
 
-		<script>
-            function initialize(){
-			geocoder = new google.maps.Geocoder(); //instance of geocoder
-			var myCenter=new google.maps.LatLng(47,2); //instance of latitude and longitude
+      function detectBrowser() {
+        var useragent = navigator.userAgent;
+        var mapdiv = document.getElementById("map-canvas");
+        if (useragent.indexOf('iPhone') != -1 || useragent.indexOf('Android') != -1 ) {
+            mapdiv.style.width = '100%';
+            mapdiv.style.height = '100%';
+        } else {
+            mapdiv.style.width = '600px';
+            mapdiv.style.height = '800px';
+        }
+      }
+        var mapOptions = {
+          center: new google.maps.LatLng(5.33,.12),
+          zoom: 7
+        };
+        map = new google.maps.Map(document.getElementById("map-canvas"),
+            mapOptions);
+        {% for incident in incident_list %}
+            var marker = new google.maps.Marker({
+                map:map,
+                draggable:false,
+                position:new google.maps.LatLng({{incident.x_gps_coordinate}},{{incident.y_gps_coordinate}})
+            });
+            var content_string = '<div id="content" style="overflow:auto;width:100%;height:100%;">' +
+                                 '<h1 id ="date">{{incident.pub_date}}</h1>'+
+                                 '<h2 id ="latlng">Latitude: {{incident.x_gps_coordinate}} Longitude: {{incident.y_gps_coordinate}}</h2>'+
+                                 '<div "body_content">'+
+                                 '<img src=media/{{incident.incident_image}} style="height:45%;width:45%;float:left;margin:5px;padding:5px;">'+
+                                 '<p style="font-size:16px;"> {{incident.description}}</p>'+
+                                 '</div></div>';
 
-            var mapOptions = {
+            var info_window = new google.maps.InfoWindow({
+                content:content_string,
+                maxWidth:500,
+            });
+            allMarkers.push(marker);
+            allInfoWindows.push(info_window);
+            google.maps.event.addListener(allMarkers[{{forloop.counter0}}], 'click', function() {
+            allInfoWindows[{{forloop.counter0}}].open(map,allMarkers[{{forloop.counter0}}]);
+            });
+      {% endfor %}
+      }
 
-                center: new google.maps.LatLng(0, 0), //center of map set to middle
-                zoom: 2,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-            };
-            map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions); //instance of map
+    google.maps.event.addDomListener(window, 'load', initialize);
+    var rows = document.getElementsByTagName("TR");
+    for(var i = 0; i < rows.length; i++){
+        rows[i].addEventListener("mouseover", function(){
+            this.style.color="#5CADFF";
+        });
+        rows[i].addEventListener("mouseout", function(){
+            this.style.color="black";
+        });
+    }
 
-			{% for incident in incident_list %} //loop through countries
-				codeAddress("{{incident}}"); //call function and pass string and django template tag
-			{% endfor %} //end for
+    function animateMarker(row_id){
+        allMarkers[row_id].setAnimation(google.maps.Animation.BOUNCE);
+    }
+    function stopMarker(row_id){
+        allMarkers[row_id].setAnimation(null);
+    }
+    function displayInfo(row_id){
+        map.setCenter(allMarkers[row_id].getPosition());
+        map.setZoom(5)
+        allInfoWindows[row_id].open(map,allMarkers[row_id]);
+    }
 
-
-		    }
-
-
-
-        google.maps.event.addDomListener(window, 'load', initialize);
-        </script>
-	</head>
+  </script>
 </html>
