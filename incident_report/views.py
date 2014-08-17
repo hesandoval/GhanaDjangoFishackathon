@@ -55,12 +55,10 @@ def lol(request):
     try:
         data = json.loads(request.body)
         #print "Data: ", data
-        image = data['photograph']
-        bytes = BytesIO()
-        bytes.write(image)
-        latitude = data['lat-coordinate']
-        longitude = data['long-coordinate']
-        description = data['description']
+        image = data['PHOTOGRAPH']
+        latitude = data['LATITUDE']
+        longitude = data['LONGITUDE']
+        description = data['DESCRIPTION']
         today = now()
         print "\n\n\nDescription: ", description
 
