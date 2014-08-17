@@ -17,19 +17,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 def index(request):
     return HttpResponse("Index")
 
-@csrf_exempt
-def receive_incident(request):
-    print "Working..."
-    return HttpResponse("")
-
 def show_map(request):
     incident_list = Incident.objects.get_queryset()
     api_key = "AIzaSyBiH87EbyZfS3ekdWJ_BBQ-vlrE8jhU-jk"
     context = {'incident_list':incident_list, "API_KEY":api_key}
     return render(request, 'incident_report/map.html', context)
-
-#def add_user(request):
-#    user = User.objects.create()
 
 def incident(request):
     if request.method == 'POST':
@@ -50,7 +42,7 @@ def incident(request):
 
 
 @csrf_exempt
-def lol(request):
+def receive_incident(request):
     #print "LOL"
     print "Request: ", request
     try:
