@@ -51,31 +51,26 @@ def incident(request):
 
 @csrf_exempt
 def lol(request):
-    print "LOL"
+    #print "LOL"
+    print "Request: ", request
     try:
-        data = json.loads(request.body)
         #print "Data: ", data
-        image = data['PHOTOGRAPH']
-        latitude = data['LATITUDE']
-        longitude = data['LONGITUDE']
-        description = data['DESCRIPTION']
+
+        latitude = request.POST['LATITUDE']
+        print "got latitude"
+        longitude = request.POST['LONGITUDE']
+        print "got longitude"
+        description = request.POST['DESCRIPTION']
+        print "got description"
+        image = request.FILES['PHOTOGRAPH']
         today = now()
         print "\n\n\nDescription: ", description
-
+        i = Incident(description=description, incident_image=image, x_gps_coordinate=latitude, y_gps_coordinate=longitude,
+                    pub_date=today)
+        i.save()
     except:
         print "Could not parse json"
 
-
-    image = Image.frombytes('RGB',bytes, (400,600))
-
-    print "Image: ", type(image)
-    print BASE_DIR+"/media/documents1"
-    #image.save()
-    # photo = base64.decodestring(image)
-    image.save(BASE_DIR+"/media/documents1",".png")
-    i = Incident(description=description, incident_image=image, x_gps_coordinate=latitude, y_gps_coordinate=longitude,
-                    pub_date=today)
-    i.save()
 
 
     return HttpResponse("")
